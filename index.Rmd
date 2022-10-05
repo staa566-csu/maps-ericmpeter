@@ -1,0 +1,50 @@
+---
+title: "Maps"
+author: "Eric Peter"
+date: "10/4/2022"
+output: html_document
+---
+
+Data from https://worldpopulationreview.com/country-rankings/median-income-by-country 
+Import the data and libraries. Clean country names as necessary.
+```{r}
+library(dplyr)
+library(sf)
+library(plotly)
+library(ggplot2)
+library(viridis)
+library(rworldmap)
+
+income <- read.csv("C:/Users/ericp/Downloads/csvData.csv")
+colnames(income) <- c("country", "medianIncome", "meanIncome", "gdpPerCapita", "pop2022")
+income$country[which(income$country == 'United States')] <- 'United States of America'
+income$country[which(income$country == 'DR Congo')] <- 'Democratic Republic of the Congo'
+income$country[which(income$country == 'Serbia')] <- 'Republic of Serbia'
+head(income)
+```
+
+Let's look at the GDP per capita around the world.
+
+```{r}
+world_sf <- st_as_sf(getMap(resolution = "low"))%>%
+  left_join(income,by = c("GEOUNIT" = "country"))
+
+
+map <- ggplot() +
+  geom_sf(data = world_sf, mapping = aes(fill = gdpPerCapita, text=sprintf("Country: %s<br>GDP Per Capita: %s", GEOUNIT, gdpPerCapita)), color = "white", size = 0.1) +
+  scale_fill_viridis(option='magma', name = "GDP Per Capita") + 
+  labs(title = "GDP Per Capita Around the World")
+
+ggplotly(map, tooltip = "text")
+```
+
+There looks to be trends by continent. Most of Africa had GDP less than \$10,000, most of South America and Asia \$10,000-\$20,000, and most of North America, Australia and Europe greater than \$20,000.
+
+
+
+
+
+
+
+
+
